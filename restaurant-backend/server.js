@@ -10,7 +10,11 @@ const restaurantRoutes = require("./routes/restaurantRoutes");
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:8080"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:8080",
+      "https://digital-restaurant-menu-steel.vercel.app",
+    ],
     credentials: true,
   })
 );
