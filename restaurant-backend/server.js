@@ -14,8 +14,11 @@ app.use(
       "http://localhost:5173",
       "http://localhost:8080",
       "https://digital-restaurant-menu-steel.vercel.app",
+      "https://digitalmenuadminpage.tejosai363.workers.dev",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
