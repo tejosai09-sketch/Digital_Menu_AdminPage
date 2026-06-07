@@ -1,20 +1,11 @@
-const mysql = require("mysql2");
+const { Pool } = require("pg");
+require("dotenv").config();
 
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-db.getConnection((err, connection) => {
-  if (err) {
-    console.log("Database Connection Failed");
-    console.log(err);
-  } else {
-    console.log("MySQL Connected Successfully");
-    connection.release();
-  }
-});
-
-module.exports = db.promise();
+module.exports = db;
