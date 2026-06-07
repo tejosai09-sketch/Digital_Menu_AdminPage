@@ -1,9 +1,9 @@
 {
-  "outputDirectory": ".output/public",
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/api/server"
     }
   ]
 }
