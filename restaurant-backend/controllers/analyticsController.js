@@ -2,63 +2,62 @@ const db = require("../config/db");
 
 const getAnalytics = async (req, res) => {
   try {
-    const [summaryRows] = await db.query(`
+    const summaryResult = await db.query(`
       SELECT
-        COUNT(*) AS todayOrders,
-        COALESCE(SUM(total_amount), 0) AS todayRevenue,
-        SUM(CASE WHEN status IN ('Pending', 'Accepted', 'Preparing', 'Ready') THEN 1 ELSE 0 END) AS pendingOrders,
-        SUM(CASE WHEN status = 'Delivered' THEN 1 ELSE 0 END) AS completedOrders
+        COUNT(*) AS "todayOrders",
+        COALESCE(SUM(total_amount), 0) AS "todayRevenue",
+        COALESCE(SUM(CASE WHEN status IN ('Pending', 'Accepted', 'Preparing', 'Ready') THEN 1 ELSE 0 END), 0) AS "pendingOrders",
+        COALESCE(SUM(CASE WHEN status = 'Delivered' THEN 1 ELSE 0 END), 0) AS "completedOrders"
       FROM orders
-      WHERE DATE(created_at) = CURDATE()
+      WHERE created_at::date = CURRENT_DATE
     `);
 
-    const [daily] = await db.query(`
-      SELECT DATE(created_at) AS label, SUM(total_amount) AS value
+    const dailyResult = await db.query(`
+      SELECT created_at::date AS label, COALESCE(SUM(total_amount), 0) AS value
       FROM orders
-      WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-      GROUP BY DATE(created_at)
-      ORDER BY DATE(created_at)
+      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY created_at::date
+      ORDER BY created_at::date
     `);
 
-    const [topProducts] = await db.query(`
-      SELECT item_name AS name, SUM(quantity) AS sold
+    const topProductsResult = await db.query(`
+      SELECT item_name AS name, COALESCE(SUM(quantity), 0) AS sold
       FROM order_items
       GROUP BY item_name
       ORDER BY sold DESC
       LIMIT 5
     `);
 
-    const [leastProducts] = await db.query(`
-      SELECT item_name AS name, SUM(quantity) AS sold
+    const leastProductsResult = await db.query(`
+      SELECT item_name AS name, COALESCE(SUM(quantity), 0) AS sold
       FROM order_items
       GROUP BY item_name
       ORDER BY sold ASC
       LIMIT 5
     `);
 
+    const summary = summaryResult.rows[0];
+
     res.json({
       success: true,
       data: {
         summary: {
-          todayOrders: Number(summaryRows[0].todayOrders || 0),
-          todayRevenue: Number(summaryRows[0].todayRevenue || 0),
-          pendingOrders: Number(summaryRows[0].pendingOrders || 0),
-          completedOrders: Number(summaryRows[0].completedOrders || 0),
+          todayOrders: Number(summary.todayOrders || 0),
+          todayRevenue: Number(summary.todayRevenue || 0),
+          pendingOrders: Number(summary.pendingOrders || 0),
+          completedOrders: Number(summary.completedOrders || 0),
         },
-        daily,
-        weekly: daily,
-        monthly: daily,
-        topProducts,
-        leastProducts,
+        daily: dailyResult.rows,
+        weekly: dailyResult.rows,
+        monthly: dailyResult.rows,
+        topProducts: topProductsResult.rows,
+        leastProducts: leastProductsResult.rows,
         topCategories: [],
       },
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch analytics",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch analytics" });
   }
 };
 

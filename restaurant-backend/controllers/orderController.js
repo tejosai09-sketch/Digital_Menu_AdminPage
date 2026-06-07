@@ -1,8 +1,6 @@
 const db = require("../config/db");
 
 const createOrder = async (req, res) => {
-  console.log("ORDER BODY:", req.body);
-
   try {
     const {
       restaurant_id,
@@ -15,20 +13,15 @@ const createOrder = async (req, res) => {
       items,
     } = req.body;
 
-    const [orderResult] = await db.query(
+    const orderResult = await db.query(
       `
       INSERT INTO orders
       (
-        restaurant_id,
-        order_type,
-        customer_name,
-        customer_phone,
-        table_number,
-        delivery_address,
-        total_amount,
-        status
+        restaurant_id, order_type, customer_name, customer_phone,
+        table_number, delivery_address, total_amount, status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      RETURNING id
       `,
       [
         restaurant_id,
@@ -42,28 +35,16 @@ const createOrder = async (req, res) => {
       ]
     );
 
-    const orderId = orderResult.insertId;
+    const orderId = orderResult.rows[0].id;
 
     for (const item of items) {
       await db.query(
         `
         INSERT INTO order_items
-        (
-          order_id,
-          menu_item_id,
-          item_name,
-          quantity,
-          price
-        )
-        VALUES (?, ?, ?, ?, ?)
+        (order_id, menu_item_id, item_name, quantity, price)
+        VALUES ($1,$2,$3,$4,$5)
         `,
-        [
-          orderId,
-          item.id,
-          item.name,
-          item.quantity,
-          item.price,
-        ]
+        [orderId, item.id, item.name, item.quantity, item.price]
       );
     }
 
@@ -74,49 +55,37 @@ const createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to create order",
-    });
+    res.status(500).json({ success: false, message: "Failed to create order" });
   }
 };
 
 const getAllOrders = async (req, res) => {
   try {
-    const [orders] = await db.query(`
+    const ordersResult = await db.query(`
       SELECT *
       FROM orders
       ORDER BY created_at DESC
     `);
 
+    const orders = ordersResult.rows;
+
     for (let order of orders) {
-      const [items] = await db.query(
+      const itemsResult = await db.query(
         `
-        SELECT
-          item_name AS name,
-          quantity,
-          price
+        SELECT item_name AS name, quantity, price
         FROM order_items
-        WHERE order_id = ?
+        WHERE order_id = $1
         `,
         [order.id]
       );
 
-      order.items = items;
+      order.items = itemsResult.rows;
     }
 
-    res.json({
-      success: true,
-      data: orders,
-    });
+    res.json({ success: true, data: orders });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch orders",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
   }
 };
 
@@ -128,42 +97,30 @@ const updateOrderStatus = async (req, res) => {
     await db.query(
       `
       UPDATE orders
-      SET status = ?
-      WHERE id = ?
+      SET status = $1
+      WHERE id = $2
       `,
       [status, id]
     );
 
-    res.json({
-      success: true,
-      message: "Order status updated",
-    });
+    res.json({ success: true, message: "Order status updated" });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to update order status",
-    });
+    res.status(500).json({ success: false, message: "Failed to update order status" });
   }
 };
+
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [orders] = await db.query(
-      "SELECT * FROM orders WHERE id = ?",
-      [id]
-    );
+    const result = await db.query("SELECT * FROM orders WHERE id = $1", [id]);
 
-    if (orders.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    res.json({
-      success: true,
-      data: orders[0],
-    });
+    res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Failed to fetch order" });
@@ -174,5 +131,5 @@ module.exports = {
   createOrder,
   getAllOrders,
   updateOrderStatus,
-   getOrderById,
+  getOrderById,
 };

@@ -2,18 +2,15 @@ const db = require("../config/db");
 
 const getRestaurant = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM restaurants WHERE id = 1");
+    const result = await db.query("SELECT * FROM restaurants WHERE id = 1");
 
     res.json({
       success: true,
-      data: rows[0],
+      data: result.rows[0],
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch restaurant settings",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch restaurant settings" });
   }
 };
 
@@ -35,15 +32,15 @@ const updateRestaurant = async (req, res) => {
       `
       UPDATE restaurants
       SET
-        name = ?,
-        tagline = ?,
-        phone1 = ?,
-        phone2 = ?,
-        address = ?,
-        logo = ?,
-        whatsapp_number = ?,
-        theme_color = ?,
-        order_mode = ?
+        name = $1,
+        tagline = $2,
+        phone1 = $3,
+        phone2 = $4,
+        address = $5,
+        logo = $6,
+        whatsapp_number = $7,
+        theme_color = $8,
+        order_mode = $9
       WHERE id = 1
       `,
       [
@@ -59,16 +56,10 @@ const updateRestaurant = async (req, res) => {
       ]
     );
 
-    res.json({
-      success: true,
-      message: "Restaurant settings updated successfully",
-    });
+    res.json({ success: true, message: "Restaurant settings updated successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update restaurant settings",
-    });
+    res.status(500).json({ success: false, message: "Failed to update restaurant settings" });
   }
 };
 
