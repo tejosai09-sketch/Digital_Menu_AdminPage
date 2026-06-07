@@ -1,13 +1,12 @@
 const db = require("../config/db");
 
-// Get all menu items
 const getAllMenuItems = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM menu_items");
+    const result = await db.query("SELECT * FROM menu_items ORDER BY id ASC");
 
     res.status(200).json({
       success: true,
-      data: rows,
+      data: result.rows,
     });
   } catch (error) {
     console.error(error);
@@ -18,20 +17,21 @@ const getAllMenuItems = async (req, res) => {
     });
   }
 };
+
 const addMenuItem = async (req, res) => {
   try {
     const {
-      restaurant_id,
+      restaurant_id = 1,
       name,
       category,
       description,
       image,
       price,
       item_type,
-      available
+      available,
     } = req.body;
 
-    const [result] = await db.query(
+    const result = await db.query(
       `
       INSERT INTO menu_items
       (
@@ -44,35 +44,36 @@ const addMenuItem = async (req, res) => {
         item_type,
         available
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      RETURNING id
       `,
       [
         restaurant_id,
         name,
         category,
-        description,
-        image,
+        description || "",
+        image || "",
         price,
-        item_type,
-        available
+        item_type || "Veg",
+        available ?? true,
       ]
     );
 
     res.status(201).json({
       success: true,
       message: "Menu item added successfully",
-      id: result.insertId
+      id: result.rows[0].id,
     });
-
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: "Failed to add menu item"
+      message: "Failed to add menu item",
     });
   }
 };
+
 const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -84,74 +85,71 @@ const updateMenuItem = async (req, res) => {
       image,
       price,
       item_type,
-      available
+      available,
     } = req.body;
 
     await db.query(
       `
       UPDATE menu_items
       SET
-        name = ?,
-        category = ?,
-        description = ?,
-        image = ?,
-        price = ?,
-        item_type = ?,
-        available = ?
-      WHERE id = ?
+        name = $1,
+        category = $2,
+        description = $3,
+        image = $4,
+        price = $5,
+        item_type = $6,
+        available = $7
+      WHERE id = $8
       `,
       [
         name,
         category,
-        description,
-        image,
+        description || "",
+        image || "",
         price,
-        item_type,
-        available,
-        id
+        item_type || "Veg",
+        available ?? true,
+        id,
       ]
     );
 
     res.json({
       success: true,
-      message: "Menu item updated successfully"
+      message: "Menu item updated successfully",
     });
-
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: "Failed to update menu item"
+      message: "Failed to update menu item",
     });
   }
 };
+
 const deleteMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
 
-    await db.query(
-      "DELETE FROM menu_items WHERE id = ?",
-      [id]
-    );
+    await db.query("DELETE FROM menu_items WHERE id = $1", [id]);
 
     res.json({
       success: true,
-      message: "Menu item deleted successfully"
+      message: "Menu item deleted successfully",
     });
-
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: "Failed to delete menu item"
+      message: "Failed to delete menu item",
     });
   }
 };
+
 module.exports = {
   getAllMenuItems,
   addMenuItem,
   updateMenuItem,
-  deleteMenuItem
+  deleteMenuItem,
 };
