@@ -1,0 +1,21 @@
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eef2f7;
+  color: #475569;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.status-pending   { background: #fff7ed; color: #c2410c; }
+.status-accepted  { background: #eff6ff; color: #1d4ed8; }
+.status-preparing { background: #fef3c7; color: #92400e; }
+.status-ready     { background: #ede9fe; color: #6d28d9; }
+.status-delivered { background: #dcfce7; color: #15803d; }
+.status-completed { background: #dcfce7; color: #15803d; }
+.status-cancelled { background: #fee2e2; color: #b91c1c; }
+.status-paid      { background: #dcfce7; color: #15803d; }
+.status-unpaid    { background: #fee2e2; color: #b91c1c; }
