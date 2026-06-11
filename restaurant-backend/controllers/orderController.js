@@ -61,31 +61,36 @@ const createOrder = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const ordersResult = await db.query(`
-      SELECT *
-      FROM orders
-      ORDER BY created_at DESC
+    const result = await db.query(`
+      SELECT 
+        o.*,
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'name', oi.item_name,
+              'quantity', oi.quantity,
+              'price', oi.price
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'
+        ) AS items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+      LIMIT 100
     `);
 
-    const orders = ordersResult.rows;
-
-    for (let order of orders) {
-      const itemsResult = await db.query(
-        `
-        SELECT item_name AS name, quantity, price
-        FROM order_items
-        WHERE order_id = $1
-        `,
-        [order.id]
-      );
-
-      order.items = itemsResult.rows;
-    }
-
-    res.json({ success: true, data: orders });
+    res.json({
+      success: true,
+      data: result.rows,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Failed to fetch orders" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+    });
   }
 };
 

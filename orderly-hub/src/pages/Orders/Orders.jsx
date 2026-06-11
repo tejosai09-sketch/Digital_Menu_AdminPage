@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import OrderTable from "../../components/OrderTable/OrderTable";
 import { getOrders, updateOrderStatus } from "../../services/orderService";
@@ -20,19 +20,54 @@ function Orders() {
   const [status, setStatus] = useState("All");
   const [date, setDate] = useState("");
 
-  const fetchOrdersData = () => {
-    getOrders().then((data) => {
-      setOrders(data);
+  const lastOrderIdRef = useRef(null);
+
+  const playNotificationSound = () => {
+    const audio = new Audio("/sounds/notification.mp3");
+    audio.volume = 1;
+
+    audio.play().catch((error) => {
+      console.log("Sound play failed:", error);
     });
   };
 
+  const fetchOrdersData = async (showNotification = false) => {
+    try {
+      const data = await getOrders();
+
+      if (data.length > 0) {
+        const latestOrderId = data[0].id;
+
+        if (
+          showNotification &&
+          lastOrderIdRef.current &&
+          latestOrderId !== lastOrderIdRef.current
+        ) {
+          playNotificationSound();
+        }
+
+        lastOrderIdRef.current = latestOrderId;
+      }
+
+      setOrders(data);
+    } catch (error) {
+      console.log("Failed to fetch orders:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchOrdersData();
+    fetchOrdersData(false);
+
+    const interval = setInterval(() => {
+      fetchOrdersData(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     await updateOrderStatus(orderId, newStatus);
-    fetchOrdersData();
+    fetchOrdersData(false);
   };
 
   const filtered = useMemo(() => {
@@ -95,8 +130,8 @@ function Orders() {
           </button>
         ))}
       </div>
-      <OrderTable orders={filtered} onUpdateStatus={handleUpdateStatus} />
 
+      <OrderTable orders={filtered} onUpdateStatus={handleUpdateStatus} />
     </AdminLayout>
   );
 }
