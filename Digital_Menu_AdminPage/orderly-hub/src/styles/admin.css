@@ -1,0 +1,35 @@
+/* Shared design tokens for the admin dashboard. Plain CSS only. */
+:root {
+  --color-bg: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-text: #1f2430;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-charcoal: #1f2430;
+  --color-charcoal-soft: #2b3140;
+  --color-orange: #ff6b1a;
+  --color-orange-soft: #fff1e8;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+  --radius: 12px;
+  --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
+  --shadow-md: 0 6px 18px rgba(17, 24, 39, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { margin: 0; padding: 0; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: 14px; }
+table { border-collapse: collapse; width: 100%; }

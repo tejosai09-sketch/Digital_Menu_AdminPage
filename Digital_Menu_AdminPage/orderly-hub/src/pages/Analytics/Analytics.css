@@ -1,0 +1,73 @@
+.analytics-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+}
+.analytics-wide { grid-column: span 2; }
+@media (max-width: 900px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+  .analytics-wide { grid-column: span 1; }
+}
+
+.analytics-card {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm);
+}
+.analytics-card h3 { margin: 0; font-size: 15px; font-weight: 700; }
+.analytics-sub { margin: 2px 0 16px; font-size: 12px; color: var(--color-muted); }
+
+.analytics-chart {
+  display: flex; align-items: flex-end; gap: 12px; height: 180px;
+  border-top: 1px dashed var(--color-border); padding-top: 12px;
+}
+.analytics-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+.analytics-bar {
+  width: 100%; max-width: 40px; border-radius: 6px 6px 0 0; margin-top: auto;
+}
+.analytics-label { margin-top: 6px; font-size: 11px; color: var(--color-muted); }
+
+.hbar-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.hbar-head {
+  display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;
+}
+.hbar-track { background: #f3f4f6; height: 8px; border-radius: 999px; overflow: hidden; }
+.hbar-fill { height: 100%; background: linear-gradient(90deg, var(--color-orange), #ff9d6c); border-radius: 999px; }
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card-box {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-card-box span {
+  font-size: 24px;
+}
+
+.summary-card-box p {
+  margin: 10px 0 6px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.summary-card-box h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+@media (max-width: 900px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}

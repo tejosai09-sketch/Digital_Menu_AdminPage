@@ -1,0 +1,76 @@
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eef2f7;
+  color: #475569;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.status-pending   { background: #fff7ed; color: #c2410c; }
+.status-accepted  { background: #eff6ff; color: #1d4ed8; }
+.status-preparing { background: #fef3c7; color: #92400e; }
+.status-ready     { background: #ede9fe; color: #6d28d9; }
+.status-delivered { background: #dcfce7; color: #15803d; }
+.status-completed { background: #dcfce7; color: #15803d; }
+.status-cancelled { background: #fee2e2; color: #b91c1c; }
+.status-paid      { background: #dcfce7; color: #15803d; }
+.status-unpaid    { background: #fee2e2; color: #b91c1c; }
+
+
+/* Existing Order Status */
+
+.status-pending {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.status-accepted {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.status-preparing {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-ready {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-delivered {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Payment Status */
+
+.status-online---paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-online---pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-cash-on-delivery {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.status-pay-to-bearer {
+  background: #ede9fe;
+  color: #7c3aed;
+}
