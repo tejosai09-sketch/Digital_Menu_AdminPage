@@ -1,0 +1,236 @@
+.ads-page {
+  padding: 8px 0 30px;
+}
+
+.ads-header h2,
+.recent-title {
+  margin: 0 0 6px;
+  font-size: 24px;
+  color: #111827;
+}
+
+.ads-header p {
+  margin: 0 0 22px;
+  color: #64748b;
+}
+
+.ads-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.ads-form {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 22px;
+  display: grid;
+  gap: 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.ads-form input,
+.ads-form textarea,
+.ads-form select {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 14px;
+  background: #f8fafc;
+}
+
+.ads-form textarea {
+  min-height: 95px;
+  resize: none;
+}
+
+.ads-date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ads-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.ads-check input {
+  width: auto;
+}
+
+.ads-form button,
+.ad-preview button,
+.ad-actions button {
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  font-weight: 700;
+}
+
+.ads-form button {
+  padding: 14px;
+  background: #ff641c;
+  color: white;
+  font-size: 15px;
+}
+
+.ad-preview {
+  min-height: 330px;
+  border-radius: 26px;
+  padding: 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  overflow: hidden;
+  color: white;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+}
+
+.ad-preview-text {
+  max-width: 55%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ad-preview-text span,
+.saved-ad span {
+  display: inline-block;
+  width: fit-content;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.ad-preview h3 {
+  font-size: 34px;
+  margin: 0 0 10px;
+}
+
+.ad-preview p {
+  opacity: 0.92;
+  line-height: 1.5;
+}
+
+.ad-preview button {
+  width: fit-content;
+  background: white;
+  color: #111827;
+  padding: 12px 18px;
+  margin-top: 14px;
+}
+
+.ad-preview-img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 70px;
+  margin: auto 0;
+}
+
+.ad-preview-img img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid rgba(255, 255, 255, 0.45);
+}
+
+.special {
+  background: linear-gradient(135deg, #ff641c, #ff9f1c);
+}
+
+.discount {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.combo {
+  background: linear-gradient(135deg, #111827, #374151);
+}
+
+.festival {
+  background: linear-gradient(135deg, #ca8a04, #facc15);
+}
+
+.premium {
+  background: linear-gradient(135deg, #020617, #7c2d12);
+}
+
+.recent-title {
+  margin-top: 28px;
+  margin-bottom: 16px;
+}
+
+.ads-list {
+  display: grid;
+  gap: 16px;
+}
+
+.saved-ad {
+  color: white;
+  border-radius: 22px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr 110px auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.saved-ad h3 {
+  margin: 0 0 6px;
+}
+
+.saved-ad p {
+  margin: 0 0 6px;
+  opacity: 0.9;
+}
+
+.saved-ad img {
+  width: 110px;
+  height: 90px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.ad-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ad-actions button {
+  background: white;
+  color: #111827;
+  padding: 10px 14px;
+}
+
+@media (max-width: 900px) {
+  .ads-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-ad {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-preview {
+    flex-direction: column;
+  }
+
+  .ad-preview-text {
+    max-width: 100%;
+  }
+}
