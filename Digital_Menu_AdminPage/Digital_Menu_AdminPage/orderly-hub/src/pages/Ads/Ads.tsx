@@ -1,7 +1,9 @@
 // @ts-nocheck
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Fuse from "fuse.js";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import { supabase } from "../../lib/supabaseClient";
+import API_BASE_URL from "../../api/api";
 import "./Ads.css";
 
 const styles = ["special", "discount", "combo", "festival", "premium"];
@@ -10,16 +12,7 @@ function Ads() {
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
-
-useEffect(() => {
-  const fetchMenu = async () => {
-    const res = await fetch("http://localhost:5000/api/menu");
-    const result = await res.json();
-    setMenuItems(result.data || []);
-  };
-
-  fetchMenu();
-}, []);
+  const [itemSearch, setItemSearch] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -30,10 +23,39 @@ useEffect(() => {
     start_date: "",
     end_date: "",
     is_active: true,
-    menu_item_id: ""
+    menu_item_id: "",
   });
 
   const [imageFile, setImageFile] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/menu`)
+      .then((res) => res.json())
+      .then((result) => setMenuItems(result.data || []))
+      .catch((err) => console.error("Menu fetch error:", err));
+  }, []);
+
+  const fuse = useMemo(() => {
+    return new Fuse(menuItems, {
+      keys: ["name", "category", "description"],
+      threshold: 0.42,
+      ignoreLocation: true,
+      includeScore: true,
+    });
+  }, [menuItems]);
+
+  const searchedMenuItems = useMemo(() => {
+    if (!itemSearch.trim()) return menuItems.slice(0, 8);
+
+    return fuse
+      .search(itemSearch)
+      .slice(0, 8)
+      .map((result) => result.item);
+  }, [itemSearch, fuse, menuItems]);
+
+  const selectedItem = menuItems.find(
+    (item) => Number(item.id) === Number(form.menu_item_id)
+  );
 
   const fetchAds = async () => {
     const { data, error } = await supabase
@@ -47,60 +69,64 @@ useEffect(() => {
   useEffect(() => {
     fetchAds();
   }, []);
-const uploadImage = async () => {
-  if (!imageFile) return { image_url: "", image_path: "" };
 
-  const fileExt = imageFile.name.split(".").pop();
-  const fileName = `${Date.now()}.${fileExt}`;
-  const filePath = fileName;
+  const uploadImage = async () => {
+    if (!imageFile) return { image_url: "", image_path: "" };
 
-  const { data, error } = await supabase.storage
-    .from("ads-images")
-    .upload(filePath, imageFile, {
-      cacheControl: "3600",
-      upsert: false,
-    });
+    const fileExt = imageFile.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = fileName;
 
-  console.log("Upload data:", data);
-  console.log("Upload error:", error);
+    const { error } = await supabase.storage
+      .from("ads-images")
+      .upload(filePath, imageFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
-  if (error) {
-    alert("Storage error: " + error.message);
-    throw error;
-  }
+    if (error) {
+      alert("Storage error: " + error.message);
+      throw error;
+    }
 
-  const { data: publicData } = supabase.storage
-    .from("ads-images")
-    .getPublicUrl(filePath);
+    const { data: publicData } = supabase.storage
+      .from("ads-images")
+      .getPublicUrl(filePath);
 
-  return {
-    image_url: publicData.publicUrl,
-    image_path: filePath,
+    return {
+      image_url: publicData.publicUrl,
+      image_path: filePath,
+    };
   };
-};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.menu_item_id) {
+      alert("Please select a linked menu item for this ad.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-const imageData = await uploadImage();
+      const imageData = await uploadImage();
 
-const payload = {
-  title: form.title,
-  description: form.description,
-  discount_text: form.discount_text,
-  button_text: form.button_text,
-  ad_style: form.ad_style.toLowerCase(),
-  is_active: form.is_active,
-  start_date: form.start_date || null,
-  end_date: form.end_date || null,
-  image_url: imageData.image_url || null,
-  image_path: imageData.image_path || null,
-  menu_item_id: form.menu_item_id || null
-};
+      const payload = {
+        title: form.title,
+        description: form.description,
+        discount_text: form.discount_text,
+        button_text: form.button_text,
+        ad_style: form.ad_style.toLowerCase(),
+        is_active: form.is_active,
+        start_date: form.start_date || null,
+        end_date: form.end_date || null,
+        image_url: imageData.image_url || null,
+        image_path: imageData.image_path || null,
+        menu_item_id: form.menu_item_id || null,
+      };
 
-const { error } = await supabase.from("ads").insert([payload]);
+      const { error } = await supabase.from("ads").insert([payload]);
 
       if (error) throw error;
 
@@ -113,8 +139,10 @@ const { error } = await supabase.from("ads").insert([payload]);
         start_date: "",
         end_date: "",
         is_active: true,
+        menu_item_id: "",
       });
 
+      setItemSearch("");
       setImageFile(null);
       fetchAds();
       alert("Ad created successfully!");
@@ -199,6 +227,65 @@ const { error } = await supabase.from("ads").insert([payload]);
               ))}
             </select>
 
+            <div className="linked-item-box">
+              <label>Linked Menu Item *</label>
+
+              <input
+                placeholder="Search item... try wrong spelling like chiken noodls"
+                value={itemSearch}
+                onChange={(e) => setItemSearch(e.target.value)}
+              />
+
+              {selectedItem && (
+                <div className="selected-item-card">
+                  <div>
+                    <strong>{selectedItem.name}</strong>
+                    <small>
+                      {selectedItem.category} • ₹{selectedItem.price}
+                    </small>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm({ ...form, menu_item_id: "" })
+                    }
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+
+              {!selectedItem && (
+                <div className="menu-search-results">
+                  {searchedMenuItems.length === 0 ? (
+                    <p>No matching items found.</p>
+                  ) : (
+                    searchedMenuItems.map((item) => (
+                      <button
+                        type="button"
+                        key={item.id}
+                        className="menu-result-item"
+                        onClick={() => {
+                          setForm({
+                            ...form,
+                            menu_item_id: item.id,
+                            title: form.title || item.name,
+                          });
+                          setItemSearch(item.name);
+                        }}
+                      >
+                        <span>{item.name}</span>
+                        <small>
+                          {item.category} • ₹{item.price}
+                        </small>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="ads-date-row">
               <input
                 type="date"
@@ -242,9 +329,15 @@ const { error } = await supabase.from("ads").insert([payload]);
           <div className={`ad-preview ${form.ad_style}`}>
             <div className="ad-preview-text">
               <span>{form.discount_text || "50% OFF"}</span>
-              <h3>{form.title || "Today Special"}</h3>
+              <h3>{form.title || selectedItem?.name || "Today Special"}</h3>
               <p>{form.description || "Delicious offer for today only."}</p>
               <button>{form.button_text || "Order Now"}</button>
+
+              {selectedItem && (
+                <small className="preview-linked-item">
+                  Linked to: {selectedItem.name}
+                </small>
+              )}
             </div>
 
             <div className="ad-preview-img">

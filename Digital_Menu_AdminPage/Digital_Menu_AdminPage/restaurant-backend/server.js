@@ -67,6 +67,13 @@ app.get("/", (req, res) => {
     message: "Restaurant Backend Running Successfully",
   });
 });
+app.get("/cors-test", (req, res) => {
+  res.json({
+    success: true,
+    message: "CORS test route working",
+    origin: req.headers.origin || "no origin",
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 
